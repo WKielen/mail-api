@@ -4,12 +4,18 @@ from flask import Flask, request, jsonify, make_response
 from functools import wraps
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from settings import JWT_KEY
-import jwt
-import datetime
+import configparser
 import smtplib
+import jwt
+
 
 app = Flask(__name__)
+
+# read config file which should be in the parent directory
+configParser = configparser.RawConfigParser()
+configFilePath = r'..\settings.txt'
+configParser.read(configFilePath)
+JWT_KEY = configParser.get('tokens', 'key')
 
 
 def token_required(f):
@@ -27,7 +33,7 @@ def token_required(f):
             token_string = token.split();
             data = jwt.decode(token_string[1], JWT_KEY)
             roles = data['role'].split(',')
-            if not ('AD' in roles or 'LM' in roles or 'LL' in role):
+            if not ('AD' in roles or 'LM' in roles or 'LL' in roles):
                 return 'Invalid role. Please acquire a proper role.', 401
         except jwt.ExpiredSignatureError:
             return 'Signature expired. Please log in again.', 401
@@ -43,6 +49,7 @@ def token_required(f):
 @app.route('/', methods=['GET'])
 def i_am_alive_to_browser():
     return 'WebSpace: the final frontier. These are the voyages. My mission: to explore strange new languages, <br>to seek out new life and new civilizations, to boldly go where no man has gone before.', 200
+
 
 @app.route('/mail', methods=['POST'])
 @token_required

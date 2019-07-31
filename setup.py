@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="mailapi_pkg",
-    version="0.0.1",
+    version="0.0.2",
     author="Wim Kielen",
     author_email="wim_kielen@hotmail.com",
     description="A small rest-api server with one api which can send a mail.",
@@ -18,4 +18,9 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+    entry_points={
+        'console_scripts': [
+            'mailapi=mailapi:main',
+        ],
+    }
 )

@@ -97,7 +97,10 @@ def send_mail():
         return 'Mail Error. Something went wrong. ', 200
     return 'Success', 200
 
+def main():
+    app.run(debug=True)
+    return
 
 if __name__ == '__main__':
     # app.run(host='192.168.178.13', port=5000)
-    app.run(debug=True)
+    main()

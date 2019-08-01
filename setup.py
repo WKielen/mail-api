@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="mailapi_pkg",
+    name="mailapi",
     version="0.0.2",
     author="Wim Kielen",
     author_email="wim_kielen@hotmail.com",
@@ -20,7 +20,7 @@ setuptools.setup(
     ],
     entry_points={
         'console_scripts': [
-            'mailapi=mailapi_pkg.api_server:main',
+            'mailapi=mailapi.mailapi:main',
         ],
     }
 )

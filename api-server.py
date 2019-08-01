@@ -1,11 +1,12 @@
 #!/usr/bin/python
 # -*- encoding: utf-8 -*-
-from flask import Flask, request, jsonify, make_response
 from functools import wraps
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from flask import Flask, request, jsonify, make_response
 import configparser
 import smtplib
+import time
 import jwt
 
 
@@ -80,7 +81,7 @@ def send_mail():
 
                 msg.attach(MIMEText(body, 'plain'))
                 smtp.sendmail(mailItem['From'], to_addresses, msg.as_string())
-
+                time.sleep(1)
             smtp.quit()
 
     except smtplib.SMTPRecipientsRefused:

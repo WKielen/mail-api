@@ -15,3 +15,20 @@ The file should look like
 [tokens]
 key = ThisIsMySecretKey 
 ```
+
+
+### Used commands
+How-to-do this example from here: 
+* https://packaging.python.org/tutorials/packaging-projects/
+
+Create a distribution
+* python setup.py sdist bdist_wheel
+
+First upload package to test pypi
+* python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+
+Install the package on another environment
+* python -m pip install --index-url https://test.pypi.org/simple/ --no-deps mailapi-pkg
+
+Upload subsequent versions to pypi
+* pip install --upgrade https://test.pypi.org/simple/ mailapi-pkg

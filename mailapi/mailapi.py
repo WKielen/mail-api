@@ -4,19 +4,20 @@ from functools import wraps
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask import Flask, request, jsonify, make_response
-import configparser
 import smtplib
 import time
+import yaml
 import jwt
 
 
 app = Flask(__name__)
 
 # read config file which should be in the parent directory
-configParser = configparser.RawConfigParser()
-configFilePath = r'..\settings.txt'
-configParser.read(configFilePath)
-JWT_KEY = configParser.get('tokens', 'key')
+
+with open("config.yml", 'r') as ymlfile:
+    cfg = yaml.load(ymlfile, Loader=yaml.BaseLoader)
+    tokens = cfg['tokens']
+    jwt_secret = tokens['jwt_secret']
 
 
 def token_required(f):
@@ -32,7 +33,7 @@ def token_required(f):
 
         try:
             token_string = token.split();
-            data = jwt.decode(token_string[1], JWT_KEY)
+            data = jwt.decode(token_string[1], jwt_secret)
             roles = data['role'].split(',')
             if not ('AD' in roles or 'LM' in roles or 'LL' in roles):
                 return 'Invalid role. Please acquire a proper role.', 401

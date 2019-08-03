@@ -7,15 +7,14 @@ The API-server checks the JWT token which is created by logging in into www.ttvn
 
 ### Prerequisites
 
-A settings.ini has to be present in the parent folder from where the api-server runs. 
+A 'config.yml' has to be present in the folder from where the api-server runs.
 
 The file should look like
 
 ```
-[tokens]
-key = ThisIsMySecretKey 
+tokens:
+    jwt_secret : ThisIsYourJWTSecret
 ```
-
 
 ### Used commands
 How-to-do this example from here: 
@@ -28,7 +27,18 @@ First upload package to test pypi
 * python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
 Install the package on another environment
-* python -m pip install --index-url https://test.pypi.org/simple/ --no-deps mailapi-pkg
+* python -m pip install --index-url https://test.pypi.org/simple/ --no-deps mailapi
 
 Upload subsequent versions to pypi
-* pip install --upgrade https://test.pypi.org/simple/ mailapi-pkg
+* pip install --upgrade https://test.pypi.org/simple/ mailapi
+
+Install distribution directly in path
+* pip install --upgrade .
+
+To fill the requirements file
+* pip freeze > requirements.txt
+
+I got the error "No module named C:\Users\wim_k\AppData\Local\Programs\Python\Python37-32\Scripts\mailapi"
+when I run mailapi. The command below solved it.
+* pip setup.py install
+

@@ -53,6 +53,14 @@ def i_am_alive_to_browser():
     return 'WebSpace: the final frontier. These are the voyages. My mission: to explore strange new languages, <br>to seek out new life and new civilizations, to boldly go where no man has gone before.', 200
 
 
+@app.route('/', methods=['OPTIONS'])
+def cors_handler():
+    resp = make_response()
+    resp.headers['Access-Control-Allow-Methods'] = 'POST, GET, PATCH, DELETE, OPTIONS'
+    resp.headers['Access-Control-Allow-Headers'] = '*'
+    return resp, 200
+
+
 @app.route('/mail', methods=['POST'])
 @token_required
 def send_mail():

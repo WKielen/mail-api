@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="mailapi",
-    version="0.0.2",
+    version="0.0.6",
     author="Wim Kielen",
     author_email="wim_kielen@hotmail.com",
     description="A small rest-api server with one api which can send a mail.",

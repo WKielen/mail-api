@@ -40,5 +40,5 @@ To fill the requirements file
 
 I got the error "No module named C:\Users\wim_k\AppData\Local\Programs\Python\Python37-32\Scripts\mailapi"
 when I run mailapi. The command below solved it.
-* pip setup.py install
+* python setup.py install
 

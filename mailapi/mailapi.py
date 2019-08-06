@@ -4,6 +4,8 @@ from functools import wraps
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask import Flask, request, jsonify, make_response
+from flask_cors import CORS
+import pkg_resources
 import smtplib
 import time
 import yaml
@@ -11,9 +13,12 @@ import jwt
 
 
 app = Flask(__name__)
+cors = CORS()
+cors.init_app(app, origins='*')
+
+version = pkg_resources.require('mailapi')[0].version
 
 # read config file which should be in the parent directory
-
 with open("config.yml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile, Loader=yaml.BaseLoader)
     tokens = cfg['tokens']
@@ -39,6 +44,8 @@ def token_required(f):
                 return 'Invalid role. Please acquire a proper role.', 401
         except jwt.ExpiredSignatureError:
             return 'Signature expired. Please log in again.', 401
+        except jwt.exceptions.InvalidSignatureError:
+            return 'Invalid token. Please log in again.', 401
         except jwt.InvalidTokenError:
             return 'Invalid token. Please log in again.', 401
         except Exception as exc:
@@ -50,15 +57,16 @@ def token_required(f):
 
 @app.route('/', methods=['GET'])
 def i_am_alive_to_browser():
-    return 'WebSpace: the final frontier. These are the voyages. My mission: to explore strange new languages, <br>to seek out new life and new civilizations, to boldly go where no man has gone before.', 200
+    return 'WebSpace: the final frontier. These are the voyages of version ' + version + '. The mission: to explore strange new languages, <br>to seek out new life and new civilizations, to boldly go where no man has gone before.', 200
 
 
-@app.route('/', methods=['OPTIONS'])
-def cors_handler():
-    resp = make_response()
-    resp.headers['Access-Control-Allow-Methods'] = 'POST, GET, PATCH, DELETE, OPTIONS'
-    resp.headers['Access-Control-Allow-Headers'] = '*'
-    return resp, 200
+# @app.route('/', methods=['OPTIONS'])
+# def cors_handler():
+#     print(resp)
+#     resp = make_response()
+#     resp.headers['Access-Control-Allow-Methods'] = 'POST, GET, PATCH, DELETE, OPTIONS'
+#     resp.headers['Access-Control-Allow-Headers'] = '*'
+#     return resp, 200
 
 
 @app.route('/mail', methods=['POST'])
@@ -109,10 +117,10 @@ def send_mail():
 
 
 def main():
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
+    # app.run(debug=True)
     return
 
 
 if __name__ == '__main__':
-    # app.run(host='192.168.178.13', port=5000)
     main()

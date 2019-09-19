@@ -3,7 +3,7 @@
 from functools import wraps
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from flask import Flask, request, jsonify, make_response
+from flask import Flask, request
 from flask_cors import CORS
 import pkg_resources
 import smtplib
@@ -37,7 +37,7 @@ def token_required(f):
             return 'Token is missing', 401
 
         try:
-            token_string = token.split();
+            token_string = token.split()
             data = jwt.decode(token_string[1], jwt_secret)
             roles = data['role'].split(',')
             if not ('AD' in roles or 'LM' in roles or 'LL' in roles):
@@ -55,19 +55,9 @@ def token_required(f):
     return decorated
 
 
-@app.route('/', methods=['GET'])
-def i_am_alive_to_browser():
-    return 'WebSpace: the final frontier. These are the voyages of version ' + version + '. The mission: to explore strange new languages, <br>to seek out new life and new civilizations, to boldly go where no man has gone before.', 200
-
-
-# @app.route('/', methods=['OPTIONS'])
-# def cors_handler():
-#     print(resp)
-#     resp = make_response()
-#     resp.headers['Access-Control-Allow-Methods'] = 'POST, GET, PATCH, DELETE, OPTIONS'
-#     resp.headers['Access-Control-Allow-Headers'] = '*'
-#     return resp, 200
-
+# @app.route('/', methods=['GET'])
+# def i_am_alive_to_browser():
+#     return 'WebSpace: the final frontier. These are the voyages of version ' + version + '. The mission: to explore strange new languages, <br>to seek out new life and new civilizations, to boldly go where no man has gone before.', 200
 
 @app.route('/mail', methods=['POST'])
 @token_required

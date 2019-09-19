@@ -1,1 +1,1 @@
-name = "mailapi"
+name = "script"

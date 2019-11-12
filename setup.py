@@ -20,7 +20,7 @@ setuptools.setup(
     ],
     entry_points={
         'console_scripts': [
-            'mailapi=mailapi.mailapi:main',
+            'mailapi=mailapi.script:main',
         ],
     }
 )

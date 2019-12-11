@@ -117,7 +117,15 @@ def send_mail():
     return 'Success', 200
 
 
-notificationPayload = '{"notification": {"title": "TTVN Nieuwegein","body": "XYZ is lid geworden","icon": "assets/icons/app-logo-72x72.png", "vibrate": [100, 50, 100], "data": {"primaryKey": "1"}, "actions": [{"action": "explore","title": "Go to the site"}]}}'
+notificationPayload = ('{"notification":'
+                       '{"title": "TTVN Nieuwegein",'
+                       '"body": "XYZ is lid geworden",'
+                       '"icon": "assets/icons/app-logo-72x72.png",'
+                       '"vibrate": [100, 50, 100],'
+                       '"data": {"primaryKey": "1"},'
+                       '"actions": '
+                          '[{"action": "explore",'
+                          '"title": "Go to the site"}]}}')
 
 
 app.config['SECRET_KEY'] = '9OLWxND4o83j4K4iuopO'
@@ -129,7 +137,7 @@ VAPID_PRIVATE_KEY = open(DER_BASE64_ENCODED_PRIVATE_KEY_FILE_PATH, "r+").readlin
 VAPID_PUBLIC_KEY = open(DER_BASE64_ENCODED_PUBLIC_KEY_FILE_PATH, "r+").read().strip("\n")
 
 VAPID_CLAIMS = {
-    "sub": "mailto:develop@raturi.in"
+    "sub": "mailto:secretaris@ttvn.nl"
 }
 
 def send_web_push(subscription_information, message_body):

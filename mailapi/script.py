@@ -4,7 +4,8 @@ import os
 from functools import wraps
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from flask import Flask, request, jsonify, make_response, json
+from flask import Flask, Response, request, jsonify, make_response, json
+
 from flask_cors import CORS
 import pkg_resources
 import smtplib
@@ -24,6 +25,12 @@ with open("config.yml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile, Loader=yaml.BaseLoader)
     tokens = cfg['tokens']
     jwt_secret = tokens['jwt_secret']
+
+    vapid = cfg['vapid']
+    vapid_secret_key = vapid['secret_key']
+    vapid_public_key = vapid['public_key']
+    vapid_private_key = vapid['private_key']
+    vapid_claims = vapid['claims']
 
 
 def token_required(f):
@@ -53,6 +60,7 @@ def token_required(f):
             return 'Token is invalid', 401
 
         return f(*args, **kwargs)
+
     return decorated
 
 
@@ -117,44 +125,37 @@ def send_mail():
     return 'Success', 200
 
 
-notificationPayload = '{"notification": {"title": "TTVN Nieuwegein","body": "XYZ is lid geworden","icon": "assets/icons/app-logo-72x72.png", "vibrate": [100, 50, 100], "data": {"primaryKey": "1"}, "actions": [{"action": "explore","title": "Go to the site"}]}}'
-
-
-app.config['SECRET_KEY'] = '9OLWxND4o83j4K4iuopO'
-
-DER_BASE64_ENCODED_PRIVATE_KEY_FILE_PATH = os.path.join(os.getcwd(), "private_key.txt")
-DER_BASE64_ENCODED_PUBLIC_KEY_FILE_PATH = os.path.join(os.getcwd(), "public_key.txt")
-
-VAPID_PRIVATE_KEY = open(DER_BASE64_ENCODED_PRIVATE_KEY_FILE_PATH, "r+").readline().strip("\n")
-VAPID_PUBLIC_KEY = open(DER_BASE64_ENCODED_PUBLIC_KEY_FILE_PATH, "r+").read().strip("\n")
-
-VAPID_CLAIMS = {
-    "sub": "mailto:develop@raturi.in"
-}
-
 def send_web_push(subscription_information, message_body):
     return webpush(
         subscription_info=subscription_information,
         data=message_body,
-        vapid_private_key='o2pjY0wWgWSHZUJzhS59JZpY_TY9QItcRZgwUrw7_8I',
-        vapid_claims=VAPID_CLAIMS
+        vapid_private_key=vapid_private_key,
+        vapid_claims=vapid_claims
     )
 
 
-@app.route('/notification', methods=['POST'])
+@app.route('/notification', methods=['POST', 'GET'])
 @token_required
 def send_notification():
+    if request.method == "GET":
+        return Response(response=json.dumps({"public_key": vapid_public_key}),
+                        headers={"Access-Control-Allow-Origin": "*"},
+                        content_type="application/json")
+
     print("is_json", request.is_json)
 
     if not request.json or not request.json.get('sub_token'):
+        return jsonify({'failed': 1})
+    if not request.json.get('message'):
         return jsonify({'failed': 1})
 
     print("request.json", request.json)
 
     token = request.json.get('sub_token')
+    notificationpayload = request.json.get('message')
     try:
         token = json.loads(token)
-        send_web_push(token, notificationPayload)
+        send_web_push(token, notificationpayload)
         return jsonify({'success': 1})
     except Exception as e:
         print("error", e)

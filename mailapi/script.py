@@ -45,10 +45,10 @@ def token_required(f):
             return 'Token is missing', 401
 
         try:
-            token_string = token.split();
+            token_string = token.split()
             data = jwt.decode(token_string[1], jwt_secret)
             roles = data['role'].split(',')
-            if not ('AD' in roles or 'LM' in roles or 'LL' in roles):
+            if not ('AD' in roles or 'BS' in roles or 'JC' in roles or 'TR' in roles or 'LA' in roles or 'PM'):
                 return 'Invalid role. Please acquire a proper role.', 401
         except jwt.ExpiredSignatureError:
             return 'Signature expired. Please log in again.', 401
@@ -81,6 +81,7 @@ def i_am_alive_to_browser():
 @app.route('/mail', methods=['POST'])
 @token_required
 def send_mail():
+    response = {}
     data = request.get_json()
     email_user = data['UserId']
     email_password = data['Password']
@@ -92,37 +93,63 @@ def send_mail():
 
             for mailItem in data['MailItems']:
 
+                to_addresses = []
                 msg = MIMEMultipart()
-                msg['From'] = mailItem['From']
-                msg['To'] = mailItem['To']
-                msg['CC'] = mailItem['CC']
-                msg['BCC'] = mailItem['BCC']
+                msg['From'] = data['From']
+
+                if 'To' in mailItem and mailItem['To']:
+                    msg['To'] = mailItem['To']
+                    to_addresses.append(mailItem['To'])
+
+                if 'CC' in mailItem and mailItem['CC']:
+                    msg['CC'] = mailItem['CC']
+                    to_addresses.append(mailItem['CC'])
+
+                if 'BCC' in mailItem and mailItem['BCC']:
+                    msg['BCC'] = mailItem['BCC']
+                    to_addresses.append(mailItem['BCC'])
+
                 msg['Subject'] = mailItem['Subject']
 
                 body = ''
                 for line in mailItem['Message']:
                     body += line + '\n'
 
-                to_addresses = [mailItem['To']] + [mailItem['CC']] + [mailItem['BCC']]
+                # to_addresses = [mailItem['To']] + [mailItem['CC']] + [mailItem['BCC']]
 
                 msg.attach(MIMEText(body, 'plain'))
-                smtp.sendmail(mailItem['From'], to_addresses, msg.as_string())
+                smtp.sendmail(data['From'], to_addresses, msg.as_string())
                 time.sleep(1)
             smtp.quit()
 
     except smtplib.SMTPRecipientsRefused:
-        return 'Mail Error. All recipients were refused. Nobody got the mail.', 200
+        response['message'] = 'Mail Error. All recipients were refused. Nobody got the mail.'
+        return json.dumps(response), 503
     except smtplib.SMTPHeloError:
-        return 'Mail Error. The server did not reply properly to the HELO greeting.', 200
+        response['message'] = 'Mail Error. The server did not reply properly to the HELO greeting.'
+        return json.dumps(response), 503
     except smtplib.SMTPSenderRefused as exc:
-        return 'Mail Error. The server did not accept the from_address.', 200
+        response['message'] = 'Mail Error. The server did not accept the from_address.'
+        return json.dumps(response), 503
     except smtplib.SMTPDataError as exc:
-        return 'Mail Error. The server replied with an unexpected error code (other than a refusal of a recipient).', 200
+        response['message'] = 'Mail Error. The server replied with an unexpected error code (other than a refusal of a recipient).'
+        return json.dumps(response), 503
     except smtplib.SMTPNotSupportedError as exc:
-        return 'Mail Error. SMTPUTF8 was given in the mail_options but is not supported by the server.', 200
+        response['message'] = 'Mail Error. SMTPUTF8 was given in the mail_options but is not supported by the server.'
+        return json.dumps(response), 503
     except Exception as exc:
-        return 'Mail Error. Something went wrong. ', 200
-    return 'Success', 200
+        if hasattr(exc, 'message'):
+            response['message'] = 'Mail Error. Something went wrong. ' + exc.message
+            return json.dumps(response), 503
+        else:
+            print('We have an error: -----------------------------------------------------------------------')
+            print('-----------------------------------------------------------------------------------------')
+            print(exc)
+            print('-----------------------------------------------------------------------------------------')
+            response['message'] = 'Mail Error. Something went wrong.'
+            return json.dumps(response), 503
+    response['message'] = 'Success'
+    return json.dumps(response), 200
 
 
 def send_web_push(subscription_information, message_body):
@@ -134,7 +161,7 @@ def send_web_push(subscription_information, message_body):
     )
 
 
-@app.route('/notification', methods=['POST', 'GET'])
+@app.route('/notification.php', methods=['POST', 'GET'])
 @token_required
 def send_notification():
     if request.method == "GET":
@@ -163,7 +190,9 @@ def send_notification():
 
 
 def main():
-    app.run(host='0.0.0.0', port=5000, ssl_context='adhoc')
+    # os.environ['NO_PROXY'] = '0.0.0.0'
+    app.run(host='0.0.0.0', port=5000)
+    # , ssl_context='adhoc')
     # app.run(debug=True)
     return
 

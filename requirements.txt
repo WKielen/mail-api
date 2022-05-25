@@ -19,7 +19,7 @@ pkginfo==1.5.0.1
 py-vapid==1.7.0
 pycparser==2.19
 Pygments==2.4.2
-PyJWT==1.7.1
+PyJWT==2.4.0
 pyOpenSSL==19.1.0
 pywebpush==1.10.1
 PyYAML==5.1.2
